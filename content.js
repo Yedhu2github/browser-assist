@@ -726,13 +726,27 @@ let listOfPositions = {}
 
 // const fixedElements = queryByStyle({ position: 'fixed'});
 // const fsixedElements = queryByStyle({ position: 'static'});
+
+const markUp=(start,end,id)=>{
+
+}
+
+
+
 const salt = 'ssjg45avnvkd';
 count = 0;
 function visitEveryNode(node) {
   // Perform an action on the current node
   //console.log(node.style, node.nodeType); 
-if(node.classList)node.classList.add(`${salt}_${count}`);
-count++;
+  if(node.classList)node.classList.add(`${salt}_${count}`);
+  count++;
+  // console.log(node.tagName);
+    
+  // if(node.nodeType==3){
+  //   console.log(node.tagName);
+    
+  // }
+  
   // Recursively visit child nodes
   for (let i = 0; i < node.childNodes.length; i++) {
     visitEveryNode(node.childNodes[i]);
@@ -744,18 +758,38 @@ visitEveryNode(document.documentElement);
 setTimeout(()=>console.log(count),5000);
 
 // Or, to start from the body: visitEveryNode(document.body);
+let ids = [];
 function queryByStyle(styleObj, all = true) {
     const allElements = [...document.querySelectorAll('*')]; // get all elements
     const matches = allElements.filter(el => {
         const computed = window.getComputedStyle(el);
         return Object.entries(styleObj).every(([prop, value]) => {
+          const rect = el.getBoundingClientRect();
+              console.log('Top:', rect.top);
             if(computed[prop] === value){
-               // el.style.top = '40px';
-                console.log(el);
+              
+              let uniqclass;
+              el.classList.forEach(element => {
                 
+                if(element.match(salt)!==null){
+                  uniqclass=element.match(salt).input;
+                  ids.push(uniqclass);
+                }
+              });
+               
+              
             }
             return computed[prop] === value;
         });
     });
     return all ? matches : matches[0] || null;
 }
+setTimeout(()=>{
+  queryByStyle({"position":"fixed"});
+  ids.forEach(el=>{
+    let pre = document.getElementsByClassName(el)[0].style.top.trim().replace('px','');
+    pre = Number(pre);
+     document.getElementsByClassName(el)[0].style.top = `${40+pre}px`;
+  })
+  console.log(ids);
+},2000)
