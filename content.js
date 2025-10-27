@@ -704,17 +704,53 @@ shadow.innerHTML = `
 `;
 
 //document.body.prepend(toolbarContainer);
-document.body.style="margin-top:40px"
-let allDivs = document.querySelector('*');
+//document.body.style="margin-top:40px"
+//let allDivs = document.querySelector('*');
 let listOfPositions = {}
 
+// function queryByStyle(styleObj, all = true) {
+//     const allElements = [...document.querySelectorAll('*')]; // get all elements
+//     const matches = allElements.filter(el => {
+//         const computed = window.getComputedStyle(el);
+//         return Object.entries(styleObj).every(([prop, value]) => {
+//             if(computed[prop] === value){
+//                // el.style.top = '40px';
+//                 console.log(el);
+                
+//             }
+//             return computed[prop] === value;
+//         });
+//     });
+//     return all ? matches : matches[0] || null;
+// }
+
+// const fixedElements = queryByStyle({ position: 'fixed'});
+// const fsixedElements = queryByStyle({ position: 'static'});
+const salt = 'ssjg45avnvkd';
+count = 0;
+function visitEveryNode(node) {
+  // Perform an action on the current node
+  //console.log(node.style, node.nodeType); 
+if(node.classList)node.classList.add(`${salt}_${count}`);
+count++;
+  // Recursively visit child nodes
+  for (let i = 0; i < node.childNodes.length; i++) {
+    visitEveryNode(node.childNodes[i]);
+  }
+}
+
+// Start the traversal from the document body or documentElement
+visitEveryNode(document.documentElement); 
+setTimeout(()=>console.log(count),5000);
+
+// Or, to start from the body: visitEveryNode(document.body);
 function queryByStyle(styleObj, all = true) {
     const allElements = [...document.querySelectorAll('*')]; // get all elements
     const matches = allElements.filter(el => {
         const computed = window.getComputedStyle(el);
         return Object.entries(styleObj).every(([prop, value]) => {
             if(computed[prop] === value){
-                el.style.top = '40px';
+               // el.style.top = '40px';
                 console.log(el);
                 
             }
@@ -723,7 +759,3 @@ function queryByStyle(styleObj, all = true) {
     });
     return all ? matches : matches[0] || null;
 }
-
-const fixedElements = queryByStyle({ position: 'fixed'});
-const fsixedElements = queryByStyle({ position: 'static'});
-
