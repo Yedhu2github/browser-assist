@@ -655,7 +655,75 @@ N0c9rxZ1trA2r1q1wRjzDG4UNV5R4MM+3z96AKEvgItcMZ9fCZEdAjyqwDUVGctls++VT536O+ps
 zdrU17c24TjbFFgG4BcROXbc844hgpOkUqmUqF+8uBWqTyqwSIAfDVAe9f3PbGdpxcb+/oxrzBBE
 1kE1B8CDMW9XJia+jzobEREREREREREREREREREREREREREREREREREREc0Z/wCLWqRwkveoNQAA
 AABJRU5ErkJggg==`;
-     document.getElementsByTagName('div')[0].appendChild(elem);
+     document.getElementsByTagName('div')[1].appendChild(elem);
     sendResponse('ducked');
     return true; // Indicates that sendResponse will be called asynchronously
 });
+
+
+const toolbarContainer = document.createElement('div');
+toolbarContainer.id = 'dht2dge00000'
+let shadow = toolbarContainer.attachShadow({ mode: 'open' });
+
+shadow.innerHTML = `
+  <style>
+    #toolbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 40px;
+      background: #272424ff;
+      color: white;
+      z-index: 2147483647;
+      display: flex;
+      
+      box-sizing: border-box;
+    }
+      .topic{
+    border-radius: 8px;
+    border-color: brown;
+    background-color: white;
+    border-width: 3px;
+    padding-top: 3px;
+    padding-bottom: 8px;
+    padding-left: 10px;
+    padding-right: 10px;
+    color: black;
+    margin: 10px;
+    height: 14px;
+    cursor: pointer;
+    user-select: none;
+}
+  </style>
+  <div id="toolbar">
+    <span class="topic" >Topic 1</span>
+    <span class="topic" >Topic 2</span>
+    <span class="topic" >Topic 3</span>
+  </div>
+`;
+
+//document.body.prepend(toolbarContainer);
+document.body.style="margin-top:40px"
+let allDivs = document.querySelector('*');
+let listOfPositions = {}
+
+function queryByStyle(styleObj, all = true) {
+    const allElements = [...document.querySelectorAll('*')]; // get all elements
+    const matches = allElements.filter(el => {
+        const computed = window.getComputedStyle(el);
+        return Object.entries(styleObj).every(([prop, value]) => {
+            if(computed[prop] === value){
+                el.style.top = '40px';
+                console.log(el);
+                
+            }
+            return computed[prop] === value;
+        });
+    });
+    return all ? matches : matches[0] || null;
+}
+
+const fixedElements = queryByStyle({ position: 'fixed'});
+const fsixedElements = queryByStyle({ position: 'static'});
+

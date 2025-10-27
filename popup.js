@@ -6,5 +6,11 @@ document.getElementById('btn').addEventListener('click', function() {
       console.log(response);
     });
   })
-    
 })
+
+const highlightColors = {
+  "topic1" : 'red',
+  "topic2" : 'blue',
+  "topic3" : 'green',
+  "topic4" : 'cyan'
+}
