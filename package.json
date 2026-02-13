@@ -1,0 +1,52 @@
+{
+  "name": "my-extension",
+  "displayName": "My extension",
+  "version": "0.0.1",
+  "description": "browser-assistant",
+  "author": "Yedhukrishna",
+  "scripts": {
+    "dev": "plasmo dev",
+    "build": "plasmo build",
+    "package": "plasmo package"
+  },
+  "dependencies": {
+    "@huggingface/transformers": "^3.8.1",
+    "@mlc-ai/web-llm": "^0.2.80",
+    "@plasmohq/messaging": "^0.7.2",
+    "plasmo": "0.90.5",
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
+  },
+  "devDependencies": {
+    "@ianvs/prettier-plugin-sort-imports": "4.1.1",
+    "@types/chrome": "^0.1.36",
+    "@types/node": "20.11.5",
+    "@types/react": "18.2.48",
+    "@types/react-dom": "18.2.18",
+    "@webgpu/types": "^0.1.69",
+    "path-browserify": "^1.0.1",
+    "prettier": "3.2.4",
+    "typescript": "5.3.3",
+    "url": "^0.11.4"
+  },
+  "manifest": {
+    "host_permissions": [
+      "https://*/*"
+    ],
+    "permissions": [
+      "offscreen"
+    ],
+    "web_accessible_resources": [
+      {
+        "resources": [
+          "assets/models/**/*"
+        ],
+        "matches": [
+          "<all_urls>"
+        ]
+      }
+    ],"content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+  }
+  }
+}
