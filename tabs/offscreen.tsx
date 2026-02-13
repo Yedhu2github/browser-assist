@@ -20,8 +20,15 @@ async function runInference(prompt: string) {
   }
 
   const completion = await engine.chat.completions.create({
-    messages: [{ role: "user", content: prompt }]
-  })
+  messages: [
+    { 
+      role: "system", 
+      content: `You are a summarizer. You will receive text in Markdown format containing links like [text](url). 
+                Summarize the content concisely and, if a link is highly relevant to the summary, include it as a reference.` 
+    },
+    { role: "user", content: prompt }
+  ]
+})
   return completion.choices[0].message.content
 }
 
