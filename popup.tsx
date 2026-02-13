@@ -1,81 +1,161 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, type CSSProperties } from "react"
 import { sendToBackground } from "@plasmohq/messaging"
+import { useStorage } from "@plasmohq/storage/hook"
 
-function IndexPopup() {
-  const [input, setInput] = useState("")
-  const [output, setOutput] = useState("")
-  const [loading, setLoading] = useState(false)
-  
-  // New state for the progress loader
-  const [progress, setProgress] = useState(0)
-  const [statusText, setStatusText] = useState("")
+export default function IndexPopup() {
+  const [isLoaded, setIsLoaded] = useStorage("llm_loaded", false)
+  const [isActive, setIsActive] = useStorage("ai_active", false)
+  const [loadingProgress, setLoadingProgress] = useState(0)
+  const [isInitializing, setIsInitializing] = useState(false)
+const toggleAI = async () => {
+  const newState = !isActive
+  setIsActive(newState)
 
+  // 1. Get ALL tabs
+  const allTabs = await chrome.tabs.query({})
+
+  // 2. Loop and send message to each
+  allTabs.forEach((tab) => {
+    if (tab.id) {
+      chrome.tabs.sendMessage(tab.id, {
+        type: "TOGGLE_CONTENT_AI",
+        active: newState
+      }).catch((err) => {
+        // We ignore errors because some tabs (like chrome://) 
+        // don't allow content scripts to run
+        console.debug(`Could not send message to tab ${tab.id}:`, err.message)
+      })
+    }
+  })
+
+  // Also notify background
+  await sendToBackground({
+    name: "generate",
+    body: { action: "TOGGLE_STATE", active: newState }
+  })
+}
   useEffect(() => {
-    // 1. Listen for progress broadcasts from the offscreen page
-    const progressListener = (message) => {
-      if (message.type === "MODEL_PROGRESS") {
-        setProgress(Math.round(message.payload.progress * 100))
-        setStatusText(message.payload.text)
+    const listener = (msg: any) => {
+      if (msg.type === "MODEL_PROGRESS") {
+        setLoadingProgress(Math.round(msg.payload.progress * 100))
+        if (msg.payload.progress === 1) setIsLoaded(true)
       }
     }
+    chrome.runtime.onMessage.addListener(listener)
+    return () => chrome.runtime.onMessage.removeListener(listener)
+  }, [setIsLoaded])
 
-    chrome.runtime.onMessage.addListener(progressListener)
-    return () => chrome.runtime.onMessage.removeListener(progressListener)
-  }, [])
-
-  const handleSend = async () => {
-    setLoading(true)
-    setOutput("")
-    
-    // 2. Trigger the generation via background
-    const resp = await sendToBackground({
-      name: "generate",
-      body: { prompt: input }
-    })
-
-    setOutput(resp.message)
-    setLoading(false)
-    setStatusText("") // Clear progress status when done
+  const handleInit = async () => {
+    setIsInitializing(true)
+    await sendToBackground({ name: "generate", body: { action: "INIT" } })
   }
 
   return (
-    <div style={{ padding: 16, width: 350 }}>
-      <textarea 
-        style={{ width: "100%", height: "80px" }}
-        value={input} 
-        onChange={(e) => setInput(e.target.value)}
-        placeholder="Ask something..."
-      />
+    <div style={containerStyle}>
+      <h2 style={titleStyle}>Local AI Hub</h2>
       
-      <button onClick={handleSend} disabled={loading} style={{ marginTop: 8 }}>
-        {loading ? "AI is Busy..." : "Generate"}
-      </button>
-
-      {/* 3. The Loader UI */}
-      {loading && statusText && (
-        <div style={{ marginTop: 15, padding: 10, border: "1px solid #ddd", borderRadius: 8 }}>
-          <div style={{ fontSize: "12px", marginBottom: 5 }}>{statusText}</div>
-          <div style={{ background: "#eee", borderRadius: 4, height: 10, width: "100%" }}>
-            <div style={{ 
-              background: "#4CAF50", 
-              height: "100%", 
-              width: `${progress}%`, 
-              borderRadius: 4,
-              transition: "width 0.3s" 
-            }} />
-          </div>
-          <div style={{ textAlign: "right", fontSize: "10px" }}>{progress}%</div>
+      {!isLoaded ? (
+        <div style={sectionStyle}>
+          <p style={statusStyle}>Model not found in cache.</p>
+          <button 
+            onClick={handleInit} 
+            disabled={isInitializing}
+            style={isInitializing ? disabledBtn : primaryBtn}>
+            {isInitializing ? `Loading ${loadingProgress}%` : "Initialize LLM"}
+          </button>
         </div>
-      )}
-
-      {output && (
-        <div style={{ marginTop: 15, background: "#f9f9f9", padding: 10 }}>
-          <strong>Response:</strong>
-          <p>{output}</p>
+      ) : (
+        <div style={sectionStyle}>
+          <div style={statusRow}>
+            <span style={activeLabel}>{isActive ? "AI is Live" : "AI is Standby"}</span>
+            <div style={indicator(isActive)} />
+          </div>
+          
+          <button 
+            onClick={() => toggleAI()} 
+            style={isActive ? activeBtn : inactiveBtn}>
+            {isActive ? "Deactivate AI" : "Activate AI"}
+          </button>
         </div>
       )}
     </div>
   )
 }
 
-export default IndexPopup
+// --- Minimalist Styles with TypeScript Fixes ---
+
+const containerStyle: CSSProperties = { 
+  padding: "20px", 
+  width: "260px", 
+  fontFamily: "Inter, system-ui, sans-serif", 
+  textAlign: "center" as const, // 'as const' tells TS this is exactly "center"
+  background: "#fdfdfd" 
+}
+
+const titleStyle: CSSProperties = { 
+  fontSize: "16px", 
+  fontWeight: 600, 
+  marginBottom: "20px", 
+  color: "#1a1a1a" 
+}
+
+const sectionStyle: CSSProperties = { 
+  display: "flex", 
+  flexDirection: "column", 
+  gap: "12px" 
+}
+
+const statusStyle: CSSProperties = { 
+  fontSize: "12px", 
+  color: "#666" 
+}
+
+const statusRow: CSSProperties = { 
+  display: "flex", 
+  justifyContent: "center", 
+  alignItems: "center", 
+  gap: "8px", 
+  marginBottom: "4px" 
+}
+
+const activeLabel: CSSProperties = { 
+  fontSize: "11px", 
+  textTransform: "uppercase", 
+  letterSpacing: "0.5px", 
+  fontWeight: 700 
+}
+
+// Helper for dynamic styles
+const indicator = (active: boolean): CSSProperties => ({ 
+  width: "8px", 
+  height: "8px", 
+  borderRadius: "50%", 
+  background: active ? "#10b981" : "#d1d5db", 
+  boxShadow: active ? "0 0 8px #10b981" : "none" 
+})
+
+const primaryBtn: CSSProperties = { 
+  padding: "10px", 
+  borderRadius: "8px", 
+  border: "none", 
+  background: "#3b82f6", 
+  color: "white", 
+  fontWeight: 500, 
+  cursor: "pointer" 
+}
+
+const disabledBtn: CSSProperties = { 
+  ...primaryBtn, 
+  background: "#93c5fd", 
+  cursor: "wait" 
+}
+
+const activeBtn: CSSProperties = { 
+  ...primaryBtn, 
+  background: "#ef4444" 
+}
+
+const inactiveBtn: CSSProperties = { 
+  ...primaryBtn, 
+  background: "#10b981" 
+}

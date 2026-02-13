@@ -25,6 +25,7 @@
     "service_worker": "./static/background/index.ts"
   },
   "permissions": [
+    "storage",
     "offscreen"
   ],
   "content_scripts": [

@@ -1,6 +1,20 @@
 // contents/hover-handler.ts
 import { sendToBackground } from "@plasmohq/messaging"
+import { Storage } from "@plasmohq/storage"
+const storage = new Storage()
 
+
+// Your existing cleanup function
+function cleanupPage() {
+  const processedElements = document.querySelectorAll('[data-ai-read="true"]')
+  processedElements.forEach((el: HTMLElement) => {
+    delete el.dataset.aiRead
+    el.style.boxShadow = ""
+    el.style.backgroundColor = ""
+    el.style.borderLeft = ""
+    el.title = ""
+  })
+}
 let hoverTimer: number
 
 // Helper: Converts a DOM Node to Markdown-lite to preserve links
@@ -29,7 +43,7 @@ function getMarkdownWithLinks(node: Node): string {
   return text
 }
 
-window.addEventListener("mouseover", (e) => {
+const listenter = (e) => {
   const target = e.target as HTMLElement
   const container = target.closest("p, div, li, article") as HTMLElement
   
@@ -58,5 +72,22 @@ window.addEventListener("mouseover", (e) => {
 
     container.title = response.message
     container.style.backgroundColor = "rgba(59, 130, 246, 0.05)"
-  }, 800)
+  }, 80)
+}
+// 1. Listen for changes in the "ai_active" key
+storage.watch({
+  ai_active: (change) => {
+    const isNowActive = change.newValue
+    
+    if (isNowActive === false) {
+      cleanupPage() // Run your cleanup logic
+      window.removeEventListener("mouseover", listenter );
+    }else{
+        window.addEventListener("mouseover", listenter );
+
+    }
+    
+    console.log(`Global AI State changed to: ${isNowActive}`)
+  }
 })
+

@@ -15,7 +15,16 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
       justification: "Running WebGPU for local LLM inference"
     })
   }
-
+// if (req.body.action === "TOGGLE_STATE") {
+//     // Forward the toggle state to the Offscreen document
+//     await chrome.runtime.sendMessage({
+//       target: "offscreen-ai-engine",
+//       action: "SET_ACTIVE_STATUS",
+//       active: req.body.active
+//     })
+//     res.send({ status: "state_updated" })
+//     return
+//   }
   // 2. Forward the prompt to the Offscreen Document
   // We use standard chrome messaging here because the Offscreen doc 
   // is a tab-like environment, not a Plasmo background message handler.
