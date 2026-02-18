@@ -1,6 +1,6 @@
 {
-  "name": "my-extension",
-  "displayName": "My extension",
+  "name": "browsernote",
+  "displayName": "Browsernote",
   "version": "0.0.1",
   "description": "browser-assistant",
   "author": "Yedhukrishna",
@@ -12,6 +12,7 @@
   "dependencies": {
     "@huggingface/transformers": "^3.8.1",
     "@mlc-ai/web-llm": "^0.2.80",
+    "@mozilla/readability": "^0.6.0",
     "@plasmohq/messaging": "^0.7.2",
     "@plasmohq/storage": "^1.15.0",
     "plasmo": "0.90.5",
@@ -35,7 +36,7 @@
       "https://*/*"
     ],
     "permissions": [
-      "offscreen"
+      "offscreen","sidepanel"
     ],
     "web_accessible_resources": [
       {

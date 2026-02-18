@@ -15,23 +15,24 @@ const toggleAI = async () => {
   const allTabs = await chrome.tabs.query({})
 
   // 2. Loop and send message to each
-  allTabs.forEach((tab) => {
-    if (tab.id) {
-      chrome.tabs.sendMessage(tab.id, {
-        type: "TOGGLE_CONTENT_AI",
-        active: newState
-      }).catch((err) => {
-        // We ignore errors because some tabs (like chrome://) 
-        // don't allow content scripts to run
-        console.debug(`Could not send message to tab ${tab.id}:`, err.message)
-      })
-    }
-  })
+  // allTabs.forEach((tab) => {
+  //   if (tab.id) {
+  //     chrome.tabs.sendMessage(tab.id, {
+  //       type: "TOGGLE_CONTENT_AI",
+  //       active: newState
+  //     }).catch((err) => {
+  //       // We ignore errors because some tabs (like chrome://) 
+  //       // don't allow content scripts to run
+  //       console.debug(`Could not send message to tab ${tab.id}:`, err.message)
+  //     })
+  //   }
+  // })
 
   // Also notify background
   await sendToBackground({
-    name: "generate",
+    name: "toggle",
     body: { action: "TOGGLE_STATE", active: newState }
+  }).then(e=>{console.log(e);
   })
 }
   useEffect(() => {
@@ -47,7 +48,7 @@ const toggleAI = async () => {
 
   const handleInit = async () => {
     setIsInitializing(true)
-    await sendToBackground({ name: "generate", body: { action: "INIT" } })
+    await sendToBackground({ name: "toggle", body: { action: "INIT" } })
   }
 
   return (
