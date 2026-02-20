@@ -31,10 +31,7 @@ import {
 import {
   InputGroup,
   InputGroupAddon,
-  InputGroupButton,
   InputGroupInput,
-  InputGroupText,
-  InputGroupTextarea,
 } from "@/components/ui/input-group";
 const items = [
   { title: "Home", url: "#", icon: Home, alwaysShow: false },
@@ -71,12 +68,17 @@ export function AppSidebar() {
           
           <div className="mt-3">
           <SidebarGroupContent>
-            <InputGroup>
+          { !isCollapsed ? <InputGroup>
               <InputGroupInput  placeholder="Search..." />
               <InputGroupAddon>
                 <SearchIcon />
               </InputGroupAddon>
-            </InputGroup>
+            </InputGroup> : null}
+             { isCollapsed ?
+             <SidebarMenuButton tooltip="Search">
+               <SearchIcon className="w-4 h-4" />
+             </SidebarMenuButton>
+             : null}
           </SidebarGroupContent>
           </div>
         </SidebarGroup>
