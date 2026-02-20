@@ -1,7 +1,7 @@
 import type { PlasmoMessaging } from "@plasmohq/messaging";
 
 const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
-  const { prompt } = req.body;
+  const { action,active } = req.body;
 
   const existingContexts = await chrome.runtime.getContexts({
     contextTypes: [chrome.runtime.ContextType.OFFSCREEN_DOCUMENT],
@@ -14,13 +14,13 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
       justification: "Running WebGPU for local LLM inference",
     });
   }
+
+  
     const response = await chrome.runtime.sendMessage({
-      target: "offscreen-ai-engine",
-      prompt: prompt,
+      target: "toggle",
+      active: active,
     });
-    res.send({
-    message: response.answer,
-  });
+    res.send(true);
   
 
   

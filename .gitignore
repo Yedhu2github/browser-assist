@@ -1,3 +1,8 @@
-/node_modules
-/build
-/.plasmo
+node_modules/
+build/
+.plasmo/
+dist/
+browsenote-dashboard/node_modules
+browsenote-dashboard/public
+browsenote-dashboard/dist
+browsenote-dashboard/dist-ssr
